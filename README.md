@@ -1,99 +1,99 @@
-SpaceTimeDB Extension for GDevelop
-
-Author: sixdevEmail: moebius.games@gmail.com
-
+🚀 SpaceTimeDB Extension for GDevelop
+Author: sixdev
+Email: moebius.games@gmail.com
 License: MIT
 
 ✨ Overview
+This GDevelop extension enables full real-time multiplayer and persistent game state using a SpaceTimeDB server via WebSocket.
 
-This extension lets you connect your GDevelop game to a SpaceTimeDB server using WebSocket. It includes realtime table syncing, event listening, insert/update/delete operations, and automatic reconnects.
+🔄 Sync live data between players
 
-Everything is contained in a single .json file you can import into GDevelop as a ready-to-use extension.
+🧠 Insert / update / delete entries in tables
+
+🎯 React to server changes via events
+
+⚡ Built-in heartbeat & error handling
+
+📦 All logic is inside a single .json file – no external JS required
 
 ⚙ Features
-
-Connect to a SpaceTimeDB server
-
-Insert / update / delete table rows
-
-Subscribe to tables for realtime updates
-
-React to OnChange / OnError / OnOpen / OnClose events
-
-Read last data, last error, table cache
-
-Reconnect, ping/heartbeat, connection status tracking
-
-Purely native: no external JS files needed
+✅ Connect to SpaceTimeDB servers (ws/wss)
+✅ Insert, update, delete JSON rows in tables
+✅ Subscribe to tables and receive realtime updates
+✅ Trigger events: OnChange, OnOpen, OnClose, OnError
+✅ Expression access: last data, cached tables, error, status
+✅ Automatic heartbeat (ping), reconnect, and timing helpers
+✅ 100% native and portable – just import the .json into GDevelop
 
 📁 Installation
+Download or copy the spacetimedb-extension.json file
 
-Download or copy the spacetimedb-extension.json file.
+Open your GDevelop project
 
-Open your GDevelop project.
+Go to Project Manager → Extensions
 
-Go to Project Manager → Extensions.
+Click Import extension and select the file
 
-Click "Import extension" and choose the JSON file.
-
-Done!
+✅ Done!
 
 📃 Usage
+✉️ Connect to your SpaceTimeDB server
+Use the Connect action with your WebSocket server URL:
 
-✉ Connect to your server
+arduino
+Kopieren
+ws://localhost:3000  
+wss://yourserver.com
+✏️ Insert / Update / Delete rows
+All data is handled via JSON strings. Example:
 
-Use the Connect action with your WebSocket URL, e.g.:
-ws://localhost:3000 or wss://yourserver.com.
-
-✏️ Insert / Update / Delete
-
-All data is handled as JSON strings.
-
+json
+Kopieren
 {"playerId": "abc", "x": 10, "y": 20}
+Available actions:
 
-Use the actions:
+Insert into table
 
-Insert to table
+Update table entry with ID
 
-Update row in table
+Delete entry from table
 
-Delete row in table
+📡 Subscribe to a table
+Use:
 
-📊 Subscribe to a table
+pgsql
+Kopieren
+Subscribe to table "players"
+This enables automatic live updates from that table.
 
-To receive live updates:
+🔊 Event Conditions
+These trigger GDevelop events when something happens:
 
-Use Subscribe to table with the name (e.g. players)
+Event	Description
+OnChange	Any message received (parsed & cached)
+OnOpen	WebSocket connection established
+OnClose	WebSocket connection closed
+OnError	JSON error or socket error occurred
 
-🔊 Event conditions:
+📊 Expressions
+Expression	Returns
+LastData()	Full last JSON message (string)
+TableData("players")	Cached content of a table (JSON string)
+LastError()	Last error string
+ConnectionStatus()	"connected", "connecting", etc.
+TimeSinceLastMessage()	Milliseconds since last server reply
 
-OnChange – fired when any data changes
+🛡️ Security Notes
+This extension does not include login/authentication yet.
+For production use:
 
-OnOpen – fired when WebSocket connects
+Use wss:// and HTTPS
 
-OnClose – fired when WebSocket disconnects
+Implement authentication and role validation in your SpaceTimeDB reducers
 
-OnError – fired on WebSocket or JSON error
-
-Use these to trigger in-game events.
-
-🤔 Expressions (read values):
-
-LastData() – last full JSON message
-
-TableData("players") – latest cached rows for a table
-
-LastError() – last error string
-
-ConnectionStatus() – string: "connected", "closed", etc.
-
-TimeSinceLastMessage() – milliseconds since last message
-
-🛡️ Security note
-
-No authentication is included (yet). For production use, connect via HTTPS/WSS and secure your SpaceTimeDB reducers.
+Sanitize incoming JSON server-side
 
 🎉 Credits
-
 Created by sixdev
-For help or to contribute, visit: github.com/sixdev/spacetimedb-gdevelop-sdk
+GitHub: sixdev/spacetimedb-gdevelop-sdk
+Contact: moebius.games@gmail.com

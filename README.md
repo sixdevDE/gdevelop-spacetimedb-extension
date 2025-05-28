@@ -1,6 +1,8 @@
 SpaceTimeDB Extension for GDevelop
 
-Author: sixdevEmail: moebius.games@gmail.comLicense: MIT
+Author: sixdevEmail: moebius.games@gmail.com
+
+License: MIT
 
 ✨ Overview
 

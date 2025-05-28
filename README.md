@@ -1,77 +1,97 @@
-# GDevelop SpaceTimeDB Extension
+SpaceTimeDB Extension for GDevelop
 
-This is a GDevelop extension that enables easy integration with [SpaceTimeDB](https://spacetimedb.com) to build realtime multiplayer games with minimal effort.
+Author: sixdevEmail: moebius.games@gmail.comLicense: MIT
 
-## ✨ Features
+✨ Overview
 
-- Easy connection to your SpaceTimeDB server
-- Insert, update, delete rows in your multiplayer tables
-- Real-time subscriptions
-- Simple API compatible with GDevelop events
+This extension lets you connect your GDevelop game to a SpaceTimeDB server using WebSocket. It includes realtime table syncing, event listening, insert/update/delete operations, and automatic reconnects.
 
-## 📦 Installation
+Everything is contained in a single .json file you can import into GDevelop as a ready-to-use extension.
 
-1. Download the `extension/` folder from this repo.
-2. In GDevelop:
-   - Open your project
-   - Go to `Extensions` → `Import Extension`
-   - Select the `spacetimedb-extension.json` file
+⚙ Features
 
-## 🚀 Basic Usage
+Connect to a SpaceTimeDB server
 
-```javascript
-// Connect to SpaceTimeDB
-stdb.Connect("wss://your-server.com");
+Insert / update / delete table rows
 
-// Subscribe to the "players" table
-stdb.Subscribe("players");
+Subscribe to tables for realtime updates
 
-// Insert your player data
-stdb.Insert("players", JSON.stringify({
-  id: "player_1",
-  x: 120,
-  y: 200
-}));
+React to OnChange / OnError / OnOpen / OnClose events
 
-// Listen to changes
-stdb.OnChange((data) => {
-  console.log("Change from DB:", data);
-});
+Read last data, last error, table cache
 
----
+Reconnect, ping/heartbeat, connection status tracking
 
-📫 Contact
-Author: sixdev
-Email: moebius.games@gmail.com
+Purely native: no external JS files needed
 
----
+📁 Installation
 
----
+Download or copy the spacetimedb-extension.json file.
 
-## 📄 `LICENSE`
+Open your GDevelop project.
 
-```txt
-MIT License
+Go to Project Manager → Extensions.
 
+Click "Import extension" and choose the JSON file.
 
-MIT License
+Done!
 
-Copyright (c) 2025 sixdev
+📃 Usage
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+✉ Connect to your server
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Use the Connect action with your WebSocket URL, e.g.:
+ws://localhost:3000 or wss://yourserver.com.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+✏️ Insert / Update / Delete
+
+All data is handled as JSON strings.
+
+{"playerId": "abc", "x": 10, "y": 20}
+
+Use the actions:
+
+Insert to table
+
+Update row in table
+
+Delete row in table
+
+📊 Subscribe to a table
+
+To receive live updates:
+
+Use Subscribe to table with the name (e.g. players)
+
+🔊 Event conditions:
+
+OnChange – fired when any data changes
+
+OnOpen – fired when WebSocket connects
+
+OnClose – fired when WebSocket disconnects
+
+OnError – fired on WebSocket or JSON error
+
+Use these to trigger in-game events.
+
+🤔 Expressions (read values):
+
+LastData() – last full JSON message
+
+TableData("players") – latest cached rows for a table
+
+LastError() – last error string
+
+ConnectionStatus() – string: "connected", "closed", etc.
+
+TimeSinceLastMessage() – milliseconds since last message
+
+🛡️ Security note
+
+No authentication is included (yet). For production use, connect via HTTPS/WSS and secure your SpaceTimeDB reducers.
+
+🎉 Credits
+
+Created by sixdev
+For help or to contribute, visit: github.com/sixdev/spacetimedb-gdevelop-sdk

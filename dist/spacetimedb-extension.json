@@ -1,207 +1,158 @@
 {
-  "name": "SpaceTimeDB",
-  "id": "spacetimedb",
-  "version": "1.1.0",
-  "description": "SpaceTimeDB SDK for GDevelop with full WebSocket realtime DB support including connect, subscribe, insert, update, delete, events, error handling, reconnect and heartbeat.",
   "author": "sixdev",
-  "authorEmail": "moebius.games@gmail.com",
-  "license": "MIT",
-  "helpPath": "https://https://github.com/sixdevDE/gdevelop-spacetimedb-extension",
   "category": "Network",
-  "tags": ["multiplayer", "websocket", "realtime", "database", "spacetimedb"],
-  "iconPath": "res/spacetimedb_sixdev_icon.png",
+  "description": "Native GDevelop SDK for SpaceTimeDB – real-time database support over WebSocket with insert, update, delete, subscription and event system.",
+  "name": "SpaceTimeDB",
+  "version": "1.2.0",
+  "tags": ["multiplayer", "realtime", "database", "websocket"],
   "eventsFunctions": [
     {
       "name": "Connect",
-      "fullname": "Connect to SpaceTimeDB Server",
-      "description": "Open WebSocket connection to SpaceTimeDB server URL.",
+      "functionType": "Action",
+      "description": "Connect to a SpaceTimeDB server via WebSocket URL.",
       "sentence": "Connect to SpaceTimeDB at _PARAM0_",
       "parameters": [
-        {
-          "name": "URL",
-          "type": "string",
-          "description": "WebSocket URL"
-        }
+        { "name": "URL", "type": "string", "description": "ws://localhost:3000" }
       ],
-      "code": "if (!runtimeScene.spacetimedb) runtimeScene.spacetimedb = {};\nconst stdb = runtimeScene.spacetimedb;\n\nif (stdb.socket && (stdb.socket.readyState === WebSocket.OPEN || stdb.socket.readyState === WebSocket.CONNECTING)) {\n  stdb.socket.close();\n}\n\nstdb.connected = false;\nstdb.handlers = [];\nstdb.lastError = '';\nstdb.lastData = null;\nstdb.tableData = {};\nstdb.lastMessageTime = 0;\nstdb.heartbeatInterval = null;\nstdb.url = runtimeScene.getArgument(0);\n\nstdb.socket = new WebSocket(stdb.url);\n\nstdb.socket.onopen = function() {\n  stdb.connected = true;\n  stdb.lastError = '';\n  stdb.lastMessageTime = Date.now();\n  console.log('[STDB] Connected to ' + stdb.url);\n  runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnOpen');\n\n  stdb.heartbeatInterval = setInterval(() => {\n    if (stdb.connected && stdb.socket.readyState === WebSocket.OPEN) {\n      stdb.socket.send(JSON.stringify({ type: 'ping' }));\n      //console.log('[STDB] Ping sent');\n    }\n  }, 30000);\n};\n\nstdb.socket.onmessage = function(event) {\n  stdb.lastMessageTime = Date.now();\n  try {\n    const data = JSON.parse(event.data);\n    if (data.table && data.data) {\n      stdb.tableData[data.table] = data.data;\n    }\n    stdb.lastData = data;\n    stdb.handlers.forEach(cb => cb(data));\n    runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnChange');\n  } catch(e) {\n    stdb.lastError = '[STDB] JSON parse error: ' + e.message;\n    runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnError');\n  }\n};\n\nstdb.socket.onerror = function(err) {\n  stdb.lastError = '[STDB] WebSocket error';\n  console.error(stdb.lastError, err);\n  runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnError');\n};\n\nstdb.socket.onclose = function() {\n  stdb.connected = false;\n  stdb.lastError = '[STDB] Connection closed';\n  console.log(stdb.lastError);\n  runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnClose');\n  if (stdb.heartbeatInterval) {\n    clearInterval(stdb.heartbeatInterval);\n    stdb.heartbeatInterval = null;\n  }\n};"
+      "events": []
     },
     {
       "name": "Disconnect",
-      "fullname": "Disconnect from SpaceTimeDB Server",
-      "description": "Close the WebSocket connection if open.",
+      "functionType": "Action",
+      "description": "Disconnect from the SpaceTimeDB server.",
       "sentence": "Disconnect from SpaceTimeDB",
       "parameters": [],
-      "code": "if (!runtimeScene.spacetimedb) return;\nconst stdb = runtimeScene.spacetimedb;\nif (stdb.socket && (stdb.socket.readyState === WebSocket.OPEN || stdb.socket.readyState === WebSocket.CONNECTING)) {\n  stdb.socket.close();\n  stdb.connected = false;\n  stdb.handlers = [];\n  stdb.lastError = '';\n  stdb.lastData = null;\n  stdb.tableData = {};\n  if (stdb.heartbeatInterval) {\n    clearInterval(stdb.heartbeatInterval);\n    stdb.heartbeatInterval = null;\n  }\n  console.log('[STDB] Disconnected');\n}"
+      "events": []
     },
     {
       "name": "Reconnect",
-      "fullname": "Reconnect to SpaceTimeDB Server",
-      "description": "Reconnects to the previously used SpaceTimeDB server URL.",
+      "functionType": "Action",
+      "description": "Reconnect to the last known SpaceTimeDB server.",
       "sentence": "Reconnect to SpaceTimeDB",
       "parameters": [],
-      "code": "if (!runtimeScene.spacetimedb) return;\nconst stdb = runtimeScene.spacetimedb;\nif (stdb.url) {\n  runtimeScene.getEventsFunctionContext().call('Connect', stdb.url);\n} else {\n  console.warn('[STDB] No URL saved for reconnect');\n}"
+      "events": []
     },
     {
       "name": "Subscribe",
-      "fullname": "Subscribe to SpaceTimeDB table",
-      "description": "Subscribe to realtime updates from a table.",
+      "functionType": "Action",
+      "description": "Subscribe to a SpaceTimeDB table to receive live updates.",
       "sentence": "Subscribe to table _PARAM0_",
       "parameters": [
-        {
-          "name": "Table",
-          "type": "string",
-          "description": "Table name"
-        }
+        { "name": "Table", "type": "string", "description": "Table name" }
       ],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.connected) {\n  console.warn('[STDB] Subscribe failed: not connected');\n  return;\n}\nstdb.socket.send(JSON.stringify({ type: 'subscribe', table: runtimeScene.getArgument(0) }));"
+      "events": []
     },
     {
       "name": "Insert",
-      "fullname": "Insert data into SpaceTimeDB table",
-      "description": "Insert JSON data into specified table.",
+      "functionType": "Action",
+      "description": "Insert JSON data into a SpaceTimeDB table.",
       "sentence": "Insert into table _PARAM0_ data _PARAM1_",
       "parameters": [
-        {
-          "name": "Table",
-          "type": "string"
-        },
-        {
-          "name": "Data",
-          "type": "string"
-        }
+        { "name": "Table", "type": "string" },
+        { "name": "Data", "type": "string" }
       ],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.connected) {\n  console.warn('[STDB] Insert failed: not connected');\n  return;\n}\ntry {\n  const data = JSON.parse(runtimeScene.getArgument(1));\n  stdb.socket.send(JSON.stringify({ type: 'insert', table: runtimeScene.getArgument(0), data: data }));\n} catch(e) {\n  stdb.lastError = '[STDB] Insert JSON parse error: ' + e.message;\n  runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnError');\n}"
+      "events": []
     },
     {
       "name": "Update",
-      "fullname": "Update data in SpaceTimeDB table",
-      "description": "Update entry by id with JSON data.",
+      "functionType": "Action",
+      "description": "Update a row by ID in a SpaceTimeDB table.",
       "sentence": "Update table _PARAM0_ entry with id _PARAM1_ data _PARAM2_",
       "parameters": [
-        {
-          "name": "Table",
-          "type": "string"
-        },
-        {
-          "name": "ID",
-          "type": "string"
-        },
-        {
-          "name": "Data",
-          "type": "string"
-        }
+        { "name": "Table", "type": "string" },
+        { "name": "ID", "type": "string" },
+        { "name": "Data", "type": "string" }
       ],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.connected) {\n  console.warn('[STDB] Update failed: not connected');\n  return;\n}\ntry {\n  const data = JSON.parse(runtimeScene.getArgument(2));\n  stdb.socket.send(JSON.stringify({ type: 'update', table: runtimeScene.getArgument(0), id: runtimeScene.getArgument(1), data: data }));\n} catch(e) {\n  stdb.lastError = '[STDB] Update JSON parse error: ' + e.message;\n  runtimeScene.getEventsFunctionContext().trigger('SpaceTimeDB_OnError');\n}"
+      "events": []
     },
     {
       "name": "Delete",
-      "fullname": "Delete data from SpaceTimeDB table",
-      "description": "Delete entry by id.",
+      "functionType": "Action",
+      "description": "Delete a row by ID in a SpaceTimeDB table.",
       "sentence": "Delete from table _PARAM0_ entry with id _PARAM1_",
       "parameters": [
-        {
-          "name": "Table",
-          "type": "string"
-        },
-        {
-          "name": "ID",
-          "type": "string"
-        }
+        { "name": "Table", "type": "string" },
+        { "name": "ID", "type": "string" }
       ],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.connected) {\n  console.warn('[STDB] Delete failed: not connected');\n  return;\n}\nstdb.socket.send(JSON.stringify({ type: 'delete', table: runtimeScene.getArgument(0), id: runtimeScene.getArgument(1) }));"
+      "events": []
     },
     {
       "name": "ClearCache",
-      "fullname": "Clear cached SpaceTimeDB data",
-      "description": "Clear cached last data and table data.",
+      "functionType": "Action",
+      "description": "Clear all cached data from the client (last message, table states).",
       "sentence": "Clear cached SpaceTimeDB data",
       "parameters": [],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb) return;\nstdb.lastData = null;\nstdb.tableData = {};\nconsole.log('[STDB] Cached data cleared');"
+      "events": []
     }
   ],
+  "eventsBasedObjects": [],
+  "eventsBasedBehaviors": [],
   "conditions": [
     {
-      "name": "IsConnected",
-      "fullname": "Is connected to SpaceTimeDB server",
-      "description": "Checks if WebSocket is connected",
-      "sentence": "SpaceTimeDB is connected",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.connected === true;"
+      "name": "OnOpen",
+      "description": "Triggered when WebSocket connects successfully.",
+      "functionType": "Condition",
+      "sentence": "When SpaceTimeDB connection opens",
+      "parameters": [],
+      "events": []
     },
     {
-      "name": "HasError",
-      "fullname": "Has error",
-      "description": "Checks if lastError string is not empty",
-      "sentence": "SpaceTimeDB has error",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.lastError && stdb.lastError.length > 0;"
+      "name": "OnClose",
+      "description": "Triggered when WebSocket closes.",
+      "functionType": "Condition",
+      "sentence": "When SpaceTimeDB connection closes",
+      "parameters": [],
+      "events": []
+    },
+    {
+      "name": "OnError",
+      "description": "Triggered when an error occurs.",
+      "functionType": "Condition",
+      "sentence": "When SpaceTimeDB error occurs",
+      "parameters": [],
+      "events": []
+    },
+    {
+      "name": "OnChange",
+      "description": "Triggered when table data changes (insert/update/delete).",
+      "functionType": "Condition",
+      "sentence": "When SpaceTimeDB data changes",
+      "parameters": [],
+      "events": []
     }
   ],
   "expressions": [
     {
       "name": "LastData",
-      "fullname": "Last received data",
-      "description": "Returns the last received data as JSON string.",
-      "sentence": "Last SpaceTimeDB data",
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.lastData) return '{}';\nreturn JSON.stringify(stdb.lastData);"
+      "type": "string",
+      "description": "Returns the last full JSON message received.",
+      "parameters": []
     },
     {
       "name": "TableData",
-      "fullname": "Cached data for a table",
-      "description": "Returns cached data for a specific table as JSON string.",
-      "sentence": "Cached data of table _PARAM0_",
+      "type": "string",
+      "description": "Returns cached table data as JSON string.",
       "parameters": [
-        {
-          "name": "Table",
-          "type": "string"
-        }
-      ],
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.tableData) return '{}';\nconst table = runtimeScene.getArgument(0);\nreturn JSON.stringify(stdb.tableData[table] || {});"
+        { "name": "Table", "type": "string" }
+      ]
     },
     {
       "name": "LastError",
-      "fullname": "Last error message",
-      "description": "Returns the last error string.",
-      "sentence": "Last SpaceTimeDB error",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.lastError ? stdb.lastError : '';"
+      "type": "string",
+      "description": "Returns the last WebSocket or JSON error.",
+      "parameters": []
     },
     {
       "name": "ConnectionStatus",
-      "fullname": "Connection status",
-      "description": "Returns connection status as string: 'connected', 'connecting', 'closed', 'error'.",
-      "sentence": "SpaceTimeDB connection status",
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.socket) return 'closed';\nconst state = stdb.socket.readyState;\nswitch(state) {\n  case WebSocket.CONNECTING: return 'connecting';\n  case WebSocket.OPEN: return 'connected';\n  case WebSocket.CLOSING: return 'closing';\n  case WebSocket.CLOSED: return 'closed';\n  default: return 'unknown';\n}"
+      "type": "string",
+      "description": "Returns connection state: 'connected', 'disconnected', etc.",
+      "parameters": []
     },
     {
       "name": "TimeSinceLastMessage",
-      "fullname": "Time since last message",
-      "description": "Returns milliseconds since last message was received.",
-      "sentence": "Milliseconds since last SpaceTimeDB message",
-      "code": "const stdb = runtimeScene.spacetimedb;\nif (!stdb || !stdb.lastMessageTime) return -1;\nreturn Date.now() - stdb.lastMessageTime;"
-    }
-  ],
-  "events": [
-    {
-      "name": "OnChange",
-      "fullname": "On data changed",
-      "description": "Triggered when data from SpaceTimeDB server changes.",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.lastData !== null;"
-    },
-    {
-      "name": "OnError",
-      "fullname": "On error occurred",
-      "description": "Triggered when an error occurs in WebSocket or JSON parsing.",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.lastError && stdb.lastError.length > 0;"
-    },
-    {
-      "name": "OnOpen",
-      "fullname": "On connection opened",
-      "description": "Triggered when WebSocket connection is successfully opened.",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.connected === true;"
-    },
-    {
-      "name": "OnClose",
-      "fullname": "On connection closed",
-      "description": "Triggered when WebSocket connection is closed.",
-      "code": "const stdb = runtimeScene.spacetimedb;\nreturn stdb && stdb.connected === false;"
+      "type": "number",
+      "description": "Milliseconds since the last message was received.",
+      "parameters": []
     }
   ]
 }
